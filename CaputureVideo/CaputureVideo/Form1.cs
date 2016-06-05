@@ -112,13 +112,13 @@ namespace CaputureVideo
         private void video_newFrame(object sender, ref Bitmap image)
         {
 			// paint current time
-			AddDateCaption(ref image);
-       //     Bitmap img = (Bitmap)eventArgs.Frame.Clone();
+			AddDateCaptionwithBorder(ref image);
+	   //     Bitmap img = (Bitmap)eventArgs.Frame.Clone();
 
 			// 日付と時刻を入れられるように追加
 			//pictureBox1.Image = AddDateCaption(img);
-		//	img.Dispose();
-        }
+			//	img.Dispose();
+		}
 
 		// Close video source if it is running.
         private void CloseVideoSource()
@@ -200,5 +200,35 @@ namespace CaputureVideo
 				}
 			}
 		}
-    }
+
+		// draw date time with border
+		private void AddDateCaptionwithBorder(ref Bitmap image)
+		{
+			using (System.Drawing.Drawing2D.GraphicsPath graphicsPath = new System.Drawing.Drawing2D.GraphicsPath())
+			using (Graphics g = Graphics.FromImage(image))
+			using (Brush b = new SolidBrush(Color.Red))
+			// graphicPathではFontFamilyを使用する。
+			using (FontFamily fontFamily = new FontFamily("Arial"))
+			// 幅２のペンを作成
+			using (Pen p = new Pen(Color.Black, 2))
+			{
+
+				try
+				{
+					// パスを作成する。
+					graphicsPath.AddString(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss.ff"), fontFamily, (Int32)FontStyle.Bold, 50, new Point(0, image.Size.Height - 50), StringFormat.GenericDefault);
+
+					// パスの中を塗りつぶす
+					g.FillPath(Brushes.White, graphicsPath);
+
+					// 塗りつぶした後で、パスをペンで描画する。
+					g.DrawPath(p, graphicsPath);
+				}
+				finally
+				{
+
+				}
+			}
+		}
+	}
 }
