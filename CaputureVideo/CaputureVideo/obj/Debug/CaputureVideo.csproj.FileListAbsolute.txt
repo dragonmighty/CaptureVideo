@@ -1,0 +1,15 @@
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\CaputureVideo.exe.config
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\CaputureVideo.exe
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\CaputureVideo.pdb
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Video.DirectShow.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Video.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.xml
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Video.xml
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Video.DirectShow.xml
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.Form1.resources
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.Properties.Resources.resources
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.csproj.GenerateResource.Cache
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.exe
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.pdb
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.csprojResolveAssemblyReference.cache
