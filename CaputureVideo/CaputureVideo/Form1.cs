@@ -10,6 +10,11 @@ using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.Diagnostics;
+
+using log4net;
+using log4net.Appender;
+using log4net.Repository.Hierarchy;
+
 namespace CaputureVideo
 {
     public partial class Form1 : Form
@@ -18,12 +23,21 @@ namespace CaputureVideo
         private FilterInfoCollection videoDevices;
 
 		private Stopwatch stopWatch = null;
+		Timer recordTimer = new Timer();
+		private AForge.Video.FFMPEG.VideoFileWriter writer = new AForge.Video.FFMPEG.VideoFileWriter();
 
-        Timer timer1 = new Timer();
+		Timer timer1 = new Timer();
+		String strsaveFileName = String.Empty;
+
+		Boolean IsRecording = false;
+		object syncObject = new object();
+
+		Size imageSize;
+
+		private static readonly ILog LOG = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
-
-        public Form1()
+		public Form1()
         {
             InitializeComponent();
         }
@@ -33,6 +47,8 @@ namespace CaputureVideo
             getCamList();
             timer1.Tick += new EventHandler(timer1_Tick);
             timer1.Interval = 1000;
+
+			recordTimer.Tick += new EventHandler(recordTimer_tick);
         }
 
         /// <summary>
@@ -42,8 +58,8 @@ namespace CaputureVideo
         {
             try
             {
-
-                videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+				LOG.Info("カメラ一覧の読み込み");
+				videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 comboBox1.Items.Clear();
                 if (videoDevices.Count == 0) throw new ApplicationException();
 
@@ -58,8 +74,13 @@ namespace CaputureVideo
             {
                 DeviceExitst = false;
                 comboBox1.Items.Add("キャプチャデバイスがありません");
+				LOG.Info("キャプチャデバイスがありません");
             }
-        }
+			catch (Exception e)
+			{
+				LOG.Fatal(e.Message);
+			}
+		}
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -69,55 +90,86 @@ namespace CaputureVideo
         // Toggle Start and stop button
         private void buttonStart_Click(object sender, EventArgs e)
         {
-            if (buttonStart.Text == "Start")
-            {
-                if (DeviceExitst)
-                {
-					VideoCaptureDevice videoSource = new VideoCaptureDevice(videoDevices[comboBox1.SelectedIndex].MonikerString);
-					openVideoSource(videoSource);
+			try
+			{
+				if (buttonStart.Text == "Start")
+				{
+					if (DeviceExitst)
+					{
+						VideoCaptureDevice videoSource = new VideoCaptureDevice(videoDevices[comboBox1.SelectedIndex].MonikerString);
+						openVideoSource(videoSource);
 
-                    buttonStart.Text = "Stop";
-                    timer1.Enabled = true;
-                }
-            }
-            else
-            {
-                if (videoSourcePlayer.IsRunning)
-                {
-                    timer1.Enabled = false;
-                    CloseVideoSource();
-                    buttonStart.Text = "Start";
-                }
-            }
-        }
+						buttonStart.Text = "Stop";
+						timer1.Enabled = true;
+					}
+				}
+				else
+				{
+					if (videoSourcePlayer.IsRunning)
+					{
+						timer1.Enabled = false;
+						recordTimer.Stop();
+						CloseVideoWriter();
+						CloseVideoSource();
+						buttonStart.Text = "Start";
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				LOG.Fatal(ex.Message);
+			}
+		}
 
 		// Open Video Source
 		private void openVideoSource (IVideoSource source)
 		{
-			this.Cursor = Cursors.WaitCursor;
+			try
+			{
+				this.Cursor = Cursors.WaitCursor;
 
-			// stop current video source
-			CloseVideoSource();
+				// stop current video source
+				CloseVideoSource();
 
-			// start new video source
-			videoSourcePlayer.VideoSource = source;
-			videoSourcePlayer.Start();
 
-			timer1.Start();
+				// start new video source
+				videoSourcePlayer.VideoSource = source;
+				videoSourcePlayer.Start();
 
-			this.Cursor = Cursors.Default;
+				timer1.Start();
+
+				buttonSave.Enabled = true;
+
+				this.Cursor = Cursors.Default;
+			}
+			catch (Exception e)
+			{
+				LOG.Fatal(e.Message);
+			}
 		}
 
 		// New frame received by the player
         private void video_newFrame(object sender, ref Bitmap image)
         {
-			// paint current time
-			AddDateCaptionwithBorder(ref image);
-	   //     Bitmap img = (Bitmap)eventArgs.Frame.Clone();
+			try
+			{
+				// paint current time
+				AddDateCaptionwithBorder(ref image);
 
-			// 日付と時刻を入れられるように追加
-			//pictureBox1.Image = AddDateCaption(img);
-			//	img.Dispose();
+				imageSize = image.Size;
+
+				System.Threading.Monitor.Enter(syncObject);
+				if (IsRecording)
+				{
+					if ((writer != null) && (image != null) && (writer.IsOpen))
+						writer.WriteVideoFrame(image);
+				}
+				System.Threading.Monitor.Exit(syncObject);
+			}
+			catch (Exception e)
+			{
+				LOG.Fatal(e.Message);
+			}
 		}
 
 		// Close video source if it is running.
@@ -142,11 +194,62 @@ namespace CaputureVideo
 				}
 
 				videoSourcePlayer.VideoSource = null;
+
+				buttonSave.Enabled = false;
             }
         }
 
+		private void toggleVideoWriter()
+		{
+			if (IsRecording)
+			{
+				recordTimer.Stop();
+				Task.Run(() => CloseVideoWriter());
+			}
+			else
+			{
+				Task.Run(() => OpenVideoWriter());
+				recordTimer.Interval = 1000 * Convert.ToInt32(numericUpDownCutTime.Value);
+				recordTimer.Start();
+			}
+		}
+
+		private void CloseVideoWriter()
+		{
+			if (writer != null)
+			{
+				System.Diagnostics.Debug.WriteLine("VideoWriterClose");
+				writer.Close();
+				if ((strsaveFileName != String.Empty) && (System.IO.File.Exists(strsaveFileName + ".tmp")))
+					System.IO.File.Move(strsaveFileName + ".tmp", strsaveFileName + ".mp4");
+
+				System.Threading.Monitor.Enter(syncObject);
+				IsRecording = false;
+				System.Threading.Monitor.Exit(syncObject);
+			}
+		}
+
+		private void OpenVideoWriter()
+		{
+			if (writer != null)
+			{
+				if (System.IO.Directory.Exists(textBoxSavePath.Text))
+				{
+					System.Diagnostics.Debug.WriteLine("VideoWriterOpen");
+
+					strsaveFileName = textBoxSavePath.Text + @"\" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff");
+
+					writer.Open(strsaveFileName + ".tmp", imageSize.Width, imageSize.Height, 25, AForge.Video.FFMPEG.VideoCodec.MPEG4);
+
+					System.Threading.Monitor.Enter(syncObject);
+					IsRecording = true;
+					System.Threading.Monitor.Exit(syncObject);
+				}
+			}
+		}
+
 		// On time event - gather statistics
-        private void timer1_Tick(object sender, EventArgs e)
+		private void timer1_Tick(object sender, EventArgs e)
         {
 			IVideoSource videoSource = videoSourcePlayer.VideoSource;
 
@@ -176,33 +279,59 @@ namespace CaputureVideo
 			//GC.Collect();
         }
 
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            CloseVideoSource();
-        }
-
-		private void AddDateCaption(ref Bitmap image)
+		async private void recordTimer_tick(object sender, EventArgs e)
 		{
-			//Bitmap bitmapResult = new Bitmap(source.Size.Width, source.Size.Height);
-			using (Graphics g = Graphics.FromImage(image))
-			using (Brush b = new SolidBrush(Color.Red))
-			using (Font f = new Font("Arial", 30))
+
+			recordTimer.Stop();
+
+			await Task.Run(() =>
 			{
+				CloseVideoWriter();
 
-				try
-				{
-					//g.DrawImage(source, 0, 0, bitmapResult.Width, bitmapResult.Height);
-					g.DrawString(DateTime.Now.ToString(), f, b, new PointF(0, image.Size.Height - 50));
-				}
-				finally
-				{
+				//System.Threading.Thread.Sleep(1000);
 
-				}
+				OpenVideoWriter();
+			});
+
+			recordTimer.Interval = 1000 * 60 * Convert.ToInt32(numericUpDownCutTime.Value);
+			recordTimer.Start();
+
+			System.Diagnostics.Debug.WriteLine("IsRecording ->" + IsRecording.ToString());
+			if (IsRecording)
+			{
+				buttonSave.Text = "●REC";
+				buttonSave.ForeColor = Color.Red;
 			}
+			else
+			{
+				buttonSave.Text = "録画";
+				buttonSave.ForeColor = Color.Black;
+			}
+
 		}
 
+		//private void AddDateCaption(ref Bitmap image)
+		//{
+		//	//Bitmap bitmapResult = new Bitmap(source.Size.Width, source.Size.Height);
+		//	using (Graphics g = Graphics.FromImage(image))
+		//	using (Brush b = new SolidBrush(Color.Red))
+		//	using (Font f = new Font("Arial", 30))
+		//	{
+
+		//		try
+		//		{
+		//			//g.DrawImage(source, 0, 0, bitmapResult.Width, bitmapResult.Height);
+		//			g.DrawString(DateTime.Now.ToString(), f, b, new PointF(0, image.Size.Height - 50));
+		//		}
+		//		finally
+		//		{
+
+		//		}
+		//	}
+		//}
+
 		// draw date time with border
-		private void AddDateCaptionwithBorder(ref Bitmap image)
+		static private void AddDateCaptionwithBorder(ref Bitmap image)
 		{
 			using (System.Drawing.Drawing2D.GraphicsPath graphicsPath = new System.Drawing.Drawing2D.GraphicsPath())
 			using (Graphics g = Graphics.FromImage(image))
@@ -216,7 +345,7 @@ namespace CaputureVideo
 				try
 				{
 					// パスを作成する。
-					graphicsPath.AddString(DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss.ff"), fontFamily, (Int32)FontStyle.Bold, 50, new Point(0, image.Size.Height - 50), StringFormat.GenericDefault);
+					graphicsPath.AddString(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ff"), fontFamily, (Int32)FontStyle.Bold, 50, new Point(0, image.Size.Height - 50), StringFormat.GenericDefault);
 
 					// パスの中を塗りつぶす
 					g.FillPath(Brushes.White, graphicsPath);
@@ -229,6 +358,34 @@ namespace CaputureVideo
 
 				}
 			}
+		}
+
+		private void buttonSave_Click(object sender, EventArgs e)
+		{
+			toggleVideoWriter();
+		}
+
+		private void button2_Click(object sender, EventArgs e)
+		{
+			using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+			{
+				fbd.Description = "保存先を選択してください。";
+
+				if (System.IO.Directory.Exists(textBoxSavePath.ToString()))
+					fbd.SelectedPath = textBoxSavePath.ToString();
+
+
+				if (fbd.ShowDialog() == DialogResult.OK)
+				{
+					textBoxSavePath.Text = fbd.SelectedPath;
+				}
+			}
+		}
+
+		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			CloseVideoWriter();
+			CloseVideoSource();
 		}
 	}
 }
