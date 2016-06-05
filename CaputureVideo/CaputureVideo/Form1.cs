@@ -108,14 +108,11 @@ namespace CaputureVideo
 			this.Cursor = Cursors.Default;
 		}
 
-        /// <summary>
-        /// 新フレームが準備可能となった際に呼ばれるイベントハンドラ
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
+		// New frame received by the player
         private void video_newFrame(object sender, ref Bitmap image)
         {
-			
+			// paint current time
+			AddDateCaption(ref image);
        //     Bitmap img = (Bitmap)eventArgs.Frame.Clone();
 
 			// 日付と時刻を入れられるように追加
@@ -184,24 +181,23 @@ namespace CaputureVideo
             CloseVideoSource();
         }
 
-		private Bitmap AddDateCaption(Bitmap source)
+		private void AddDateCaption(ref Bitmap image)
 		{
-			Bitmap bitmapResult = new Bitmap(source.Size.Width, source.Size.Height);
-			using (Graphics g = Graphics.FromImage(bitmapResult))
-			using (Brush b = new SolidBrush(Color.FromArgb(240, Color.Red)))
+			//Bitmap bitmapResult = new Bitmap(source.Size.Width, source.Size.Height);
+			using (Graphics g = Graphics.FromImage(image))
+			using (Brush b = new SolidBrush(Color.Red))
 			using (Font f = new Font("Arial", 30))
 			{
 
 				try
 				{
-					g.DrawImage(source, 0, 0, bitmapResult.Width, bitmapResult.Height);
-					g.DrawString(DateTime.Now.ToString(), f, b, 100, 300);
+					//g.DrawImage(source, 0, 0, bitmapResult.Width, bitmapResult.Height);
+					g.DrawString(DateTime.Now.ToString(), f, b, new PointF(0, image.Size.Height - 50));
 				}
 				finally
 				{
 
 				}
-				return bitmapResult;
 			}
 		}
     }
