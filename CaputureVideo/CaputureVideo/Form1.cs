@@ -9,14 +9,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
-
+using System.Diagnostics;
 namespace CaputureVideo
 {
     public partial class Form1 : Form
     {
         private bool DeviceExitst = false;
         private FilterInfoCollection videoDevices;
-        private VideoCaptureDevice videoSource = null;
+
+		private Stopwatch stopWatch = null;
 
         Timer timer1 = new Timer();
 
@@ -72,17 +73,16 @@ namespace CaputureVideo
             {
                 if (DeviceExitst)
                 {
-                    videoSource = new VideoCaptureDevice(videoDevices[comboBox1.SelectedIndex].MonikerString);
-                    videoSource.NewFrame += new NewFrameEventHandler(video_newFrame);
-                    CloseVideoSource();
-                    videoSource.Start();
+					VideoCaptureDevice videoSource = new VideoCaptureDevice(videoDevices[comboBox1.SelectedIndex].MonikerString);
+					openVideoSource(videoSource);
+
                     buttonStart.Text = "Stop";
                     timer1.Enabled = true;
                 }
             }
             else
             {
-                if (videoSource.IsRunning)
+                if (videoSourcePlayer.IsRunning)
                 {
                     timer1.Enabled = false;
                     CloseVideoSource();
@@ -91,36 +91,92 @@ namespace CaputureVideo
             }
         }
 
+		// Open Video Source
+		private void openVideoSource (IVideoSource source)
+		{
+			this.Cursor = Cursors.WaitCursor;
+
+			// stop current video source
+			CloseVideoSource();
+
+			// start new video source
+			videoSourcePlayer.VideoSource = source;
+			videoSourcePlayer.Start();
+
+			timer1.Start();
+
+			this.Cursor = Cursors.Default;
+		}
+
         /// <summary>
         /// 新フレームが準備可能となった際に呼ばれるイベントハンドラ
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
-        private void video_newFrame(object sender, NewFrameEventArgs eventArgs)
+        private void video_newFrame(object sender, ref Bitmap image)
         {
-            Bitmap img = (Bitmap)eventArgs.Frame.Clone();
+			
+       //     Bitmap img = (Bitmap)eventArgs.Frame.Clone();
 
 			// 日付と時刻を入れられるように追加
-			pictureBox1.Image = AddDateCaption(img);
-			img.Dispose();
+			//pictureBox1.Image = AddDateCaption(img);
+		//	img.Dispose();
         }
 
+		// Close video source if it is running.
         private void CloseVideoSource()
         {
-            if (!(videoSource == null))
+            if (videoSourcePlayer.VideoSource != null)
             {
-                if (videoSource.IsRunning)
-                {
-                    videoSource.SignalToStop();
-                    videoSource = null;
-                }
+				videoSourcePlayer.SignalToStop();
+
+				for (int i = 0; i< 30; i++)
+				{
+					if (!videoSourcePlayer.IsRunning)
+					{
+						break;
+					}
+					System.Threading.Thread.Sleep(100);
+				}
+
+				if (videoSourcePlayer.IsRunning)
+				{
+					videoSourcePlayer.Stop();
+				}
+
+				videoSourcePlayer.VideoSource = null;
             }
         }
 
+		// On time event - gather statistics
         private void timer1_Tick(object sender, EventArgs e)
         {
-            label2.Text = "Device running..." + videoSource.FramesReceived.ToString() + "FPS.";
-			GC.Collect();
+			IVideoSource videoSource = videoSourcePlayer.VideoSource;
+
+			if (videoSource != null)
+			{
+				// get number of frames since the last timer tick
+				int framesReceived = videoSource.FramesReceived;
+
+				if ( stopWatch == null)
+				{
+					stopWatch = new Stopwatch();
+					stopWatch.Start();
+				}
+				else
+				{
+					stopWatch.Stop();
+
+					float fps = 1000.0f * framesReceived / stopWatch.ElapsedMilliseconds;
+					fpslabel.Text = fps.ToString("F2") + "fps";
+
+					stopWatch.Reset();
+					stopWatch.Start();
+				}
+			}
+
+            //fpslabel.Text = "Device running..." + videoSourcePlayer.VideoSource.FramesReceived.ToString() + "FPS.";
+			//GC.Collect();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)

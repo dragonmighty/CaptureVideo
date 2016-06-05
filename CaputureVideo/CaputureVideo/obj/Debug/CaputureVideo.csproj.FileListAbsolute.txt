@@ -13,3 +13,9 @@ C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\Capu
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.exe
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.pdb
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\Debug\CaputureVideo.csprojResolveAssemblyReference.cache
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Controls.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Imaging.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Math.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Controls.xml
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Imaging.xml
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\Debug\AForge.Math.xml

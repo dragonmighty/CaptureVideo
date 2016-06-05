@@ -32,33 +32,35 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.button1 = new System.Windows.Forms.Button();
 			this.buttonStart = new System.Windows.Forms.Button();
-			this.pictureBox1 = new System.Windows.Forms.PictureBox();
-			this.label2 = new System.Windows.Forms.Label();
-			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+			this.fpslabel = new System.Windows.Forms.Label();
+			this.videoSourcePlayer = new AForge.Controls.VideoSourcePlayer();
 			this.SuspendLayout();
 			// 
 			// comboBox1
 			// 
 			this.comboBox1.FormattingEnabled = true;
-			this.comboBox1.Location = new System.Drawing.Point(155, 17);
+			this.comboBox1.Location = new System.Drawing.Point(116, 14);
+			this.comboBox1.Margin = new System.Windows.Forms.Padding(2);
 			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(216, 23);
+			this.comboBox1.Size = new System.Drawing.Size(163, 20);
 			this.comboBox1.TabIndex = 0;
 			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(12, 20);
+			this.label1.Location = new System.Drawing.Point(9, 16);
+			this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(109, 15);
+			this.label1.Size = new System.Drawing.Size(87, 12);
 			this.label1.TabIndex = 1;
 			this.label1.Text = "キャプチャデバイス";
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(401, 16);
+			this.button1.Location = new System.Drawing.Point(301, 13);
+			this.button1.Margin = new System.Windows.Forms.Padding(2);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(89, 24);
+			this.button1.Size = new System.Drawing.Size(67, 19);
 			this.button1.TabIndex = 2;
 			this.button1.Text = "再取得";
 			this.button1.UseVisualStyleBackColor = true;
@@ -66,61 +68,66 @@
 			// 
 			// buttonStart
 			// 
-			this.buttonStart.Location = new System.Drawing.Point(518, 13);
+			this.buttonStart.Location = new System.Drawing.Point(388, 10);
+			this.buttonStart.Margin = new System.Windows.Forms.Padding(2);
 			this.buttonStart.Name = "buttonStart";
-			this.buttonStart.Size = new System.Drawing.Size(75, 23);
+			this.buttonStart.Size = new System.Drawing.Size(56, 18);
 			this.buttonStart.TabIndex = 0;
 			this.buttonStart.Text = "Start";
 			this.buttonStart.UseVisualStyleBackColor = true;
 			this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
 			// 
-			// pictureBox1
+			// fpslabel
 			// 
-			this.pictureBox1.Location = new System.Drawing.Point(27, 67);
-			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(1006, 817);
-			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-			this.pictureBox1.TabIndex = 3;
-			this.pictureBox1.TabStop = false;
+			this.fpslabel.AutoSize = true;
+			this.fpslabel.Location = new System.Drawing.Point(461, 14);
+			this.fpslabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+			this.fpslabel.Name = "fpslabel";
+			this.fpslabel.Size = new System.Drawing.Size(37, 12);
+			this.fpslabel.TabIndex = 4;
+			this.fpslabel.Text = "Ready";
 			// 
-			// label2
+			// videoSourcePlayer
 			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(615, 17);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(45, 15);
-			this.label2.TabIndex = 4;
-			this.label2.Text = "Ready";
+			this.videoSourcePlayer.AutoSizeControl = true;
+			this.videoSourcePlayer.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+			this.videoSourcePlayer.ForeColor = System.Drawing.Color.White;
+			this.videoSourcePlayer.Location = new System.Drawing.Point(279, 253);
+			this.videoSourcePlayer.Name = "videoSourcePlayer";
+			this.videoSourcePlayer.Size = new System.Drawing.Size(322, 242);
+			this.videoSourcePlayer.TabIndex = 5;
+			this.videoSourcePlayer.VideoSource = null;
+			this.videoSourcePlayer.NewFrame += new AForge.Controls.VideoSourcePlayer.NewFrameHandler(this.video_newFrame);
 			// 
 			// Form1
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1173, 935);
-			this.Controls.Add(this.label2);
-			this.Controls.Add(this.pictureBox1);
+			this.ClientSize = new System.Drawing.Size(880, 748);
+			this.Controls.Add(this.fpslabel);
 			this.Controls.Add(this.buttonStart);
 			this.Controls.Add(this.button1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.comboBox1);
+			this.Controls.Add(this.videoSourcePlayer);
+			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Name = "Form1";
 			this.Text = "Form1";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
 			this.Load += new System.EventHandler(this.Form1_Load);
-			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
-        }
+		}
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.ComboBox comboBox1;
+		private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Button buttonStart;
-		private System.Windows.Forms.PictureBox pictureBox1;
-		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label fpslabel;
+		private AForge.Controls.VideoSourcePlayer videoSourcePlayer;
 	}
 }
 
