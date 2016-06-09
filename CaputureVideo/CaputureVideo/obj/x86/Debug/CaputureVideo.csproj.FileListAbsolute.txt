@@ -1,3 +1,4 @@
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\log4net.config
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\CaputureVideo.exe.config
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\CaputureVideo.exe
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\CaputureVideo.pdb
@@ -6,6 +7,7 @@ C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Video.DirectShow.dll
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Video.dll
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Video.FFMPEG.dll
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\log4net.dll
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Imaging.dll
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Math.dll
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.xml
@@ -13,6 +15,7 @@ C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Video.xml
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Video.DirectShow.xml
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Video.FFMPEG.xml
+C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\log4net.xml
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Imaging.xml
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\AForge.Math.xml
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\x86\Debug\CaputureVideo.Form1.resources
@@ -21,6 +24,3 @@ C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\x86\Debug\
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\x86\Debug\CaputureVideo.exe
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\x86\Debug\CaputureVideo.pdb
 C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\obj\x86\Debug\CaputureVideo.csprojResolveAssemblyReference.cache
-C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\log4net.dll
-C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\log4net.xml
-C:\Users\Tatsuya\Desktop\CaptureVideo\CaputureVideo\CaputureVideo\bin\x86\Debug\log4net.config
