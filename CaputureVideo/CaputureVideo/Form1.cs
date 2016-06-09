@@ -88,8 +88,9 @@ namespace CaputureVideo
             getCamList();
         }
 
-        // Toggle Start and stop button
-        private void buttonStart_Click(object sender, EventArgs e)
+		// Toggle Start and stop button
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:ローカライズされるパラメーターとしてリテラルを渡さない", MessageId = "System.Windows.Forms.Control.set_Text(System.String)")]
+		private void buttonStart_Click(object sender, EventArgs e)
         {
 			try
 			{
