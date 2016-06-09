@@ -44,7 +44,8 @@ namespace CaputureVideo
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            getCamList();
+			LOG.Info("アプリケーションの起動");
+			getCamList();
             timer1.Tick += new EventHandler(timer1_Tick);
             timer1.Interval = 1000;
 
@@ -92,6 +93,7 @@ namespace CaputureVideo
         {
 			try
 			{
+				LOG.Info("Start/Stopボタンの押下");
 				if (buttonStart.Text == "Start")
 				{
 					if (DeviceExitst)
@@ -153,12 +155,12 @@ namespace CaputureVideo
         {
 			try
 			{
+				System.Threading.Monitor.Enter(syncObject);
 				// paint current time
 				AddDateCaptionwithBorder(ref image);
 
 				imageSize = image.Size;
 
-				System.Threading.Monitor.Enter(syncObject);
 				if (IsRecording)
 				{
 					if ((writer != null) && (image != null) && (writer.IsOpen))
@@ -201,6 +203,7 @@ namespace CaputureVideo
 
 		private void toggleVideoWriter()
 		{
+
 			if (IsRecording)
 			{
 				recordTimer.Stop();
@@ -209,50 +212,62 @@ namespace CaputureVideo
 			else
 			{
 				Task.Run(() => OpenVideoWriter());
-				recordTimer.Interval = 1000 * Convert.ToInt32(numericUpDownCutTime.Value);
+				recordTimer.Interval = 1000 * 60 * Convert.ToInt32(numericUpDownCutTime.Value);
+
 				recordTimer.Start();
 			}
 		}
 
 		private void CloseVideoWriter()
 		{
+			System.Threading.Monitor.Enter(syncObject);
 			if (writer != null)
 			{
-				System.Diagnostics.Debug.WriteLine("VideoWriterClose");
+				LOG.Info("録画の終了");
 				writer.Close();
 				if ((strsaveFileName != String.Empty) && (System.IO.File.Exists(strsaveFileName + ".tmp")))
 					System.IO.File.Move(strsaveFileName + ".tmp", strsaveFileName + ".mp4");
-
-				System.Threading.Monitor.Enter(syncObject);
+				LOG.Debug("ロック用オブジェクトの使用開始");
 				IsRecording = false;
-				System.Threading.Monitor.Exit(syncObject);
+				LOG.Debug("ロック用オブジェクトの使用終了");
+				LOG.Info("IsRecording ->" + IsRecording.ToString());
 			}
+			System.Threading.Monitor.Exit(syncObject);
 		}
 
 		private void OpenVideoWriter()
 		{
+			System.Threading.Monitor.Enter(syncObject);
 			if (writer != null)
 			{
 				if (System.IO.Directory.Exists(textBoxSavePath.Text))
 				{
-					System.Diagnostics.Debug.WriteLine("VideoWriterOpen");
-
 					strsaveFileName = textBoxSavePath.Text + @"\" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff");
+					LOG.Info("録画の開始: " + strsaveFileName + ".tmp");
 
 					writer.Open(strsaveFileName + ".tmp", imageSize.Width, imageSize.Height, 25, AForge.Video.FFMPEG.VideoCodec.MPEG4);
 
-					System.Threading.Monitor.Enter(syncObject);
+					LOG.Debug("ロック用オブジェクトの使用開始");
 					IsRecording = true;
-					System.Threading.Monitor.Exit(syncObject);
+					LOG.Debug("ロック用オブジェクトの使用終了");
+					LOG.Info("IsRecording ->" + IsRecording.ToString());
+				}
+				else
+				{
+					LOG.Info("書き込み先ディレクトリが存在しない ->" + textBoxSavePath.Text);
 				}
 			}
+			else
+			{
+				LOG.Info("writerがnull");
+			}
+			System.Threading.Monitor.Exit(syncObject);
 		}
 
 		// On time event - gather statistics
 		private void timer1_Tick(object sender, EventArgs e)
         {
 			IVideoSource videoSource = videoSourcePlayer.VideoSource;
-
 			if (videoSource != null)
 			{
 				// get number of frames since the last timer tick
@@ -273,6 +288,17 @@ namespace CaputureVideo
 					stopWatch.Reset();
 					stopWatch.Start();
 				}
+
+				if (IsRecording)
+				{
+					buttonSave.Text = "●REC";
+					buttonSave.ForeColor = Color.Red;
+				}
+				else
+				{
+					buttonSave.Text = "録画";
+					buttonSave.ForeColor = Color.Black;
+				}
 			}
 
             //fpslabel.Text = "Device running..." + videoSourcePlayer.VideoSource.FramesReceived.ToString() + "FPS.";
@@ -281,32 +307,24 @@ namespace CaputureVideo
 
 		async private void recordTimer_tick(object sender, EventArgs e)
 		{
+			LOG.Info("録画分割タイマーが呼ばれました");
 
-			recordTimer.Stop();
+			//recordTimer.Stop();
 
 			await Task.Run(() =>
 			{
 				CloseVideoWriter();
 
-				//System.Threading.Thread.Sleep(1000);
+				System.Threading.Thread.Sleep(500);
 
 				OpenVideoWriter();
 			});
 
-			recordTimer.Interval = 1000 * 60 * Convert.ToInt32(numericUpDownCutTime.Value);
-			recordTimer.Start();
+			//recordTimer.Interval = 1000 * 60 * Convert.ToInt32(numericUpDownCutTime.Value);
+			//recordTimer.Start();
 
-			System.Diagnostics.Debug.WriteLine("IsRecording ->" + IsRecording.ToString());
-			if (IsRecording)
-			{
-				buttonSave.Text = "●REC";
-				buttonSave.ForeColor = Color.Red;
-			}
-			else
-			{
-				buttonSave.Text = "録画";
-				buttonSave.ForeColor = Color.Black;
-			}
+			LOG.Info("IsRecording ->" + IsRecording.ToString());
+
 
 		}
 
@@ -362,6 +380,7 @@ namespace CaputureVideo
 
 		private void buttonSave_Click(object sender, EventArgs e)
 		{
+			LOG.Info("録画切り替えボタンの押下");
 			toggleVideoWriter();
 		}
 
@@ -384,6 +403,7 @@ namespace CaputureVideo
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			LOG.Info("アプリケーションの終了");
 			CloseVideoWriter();
 			CloseVideoSource();
 		}
