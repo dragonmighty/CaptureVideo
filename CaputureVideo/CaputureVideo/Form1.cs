@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using AForge.Video;
 using AForge.Video.DirectShow;
 using System.Diagnostics;
+using System.IO;
 
 using log4net;
 using log4net.Appender;
@@ -227,8 +228,12 @@ namespace CaputureVideo
 			{
 				LOG.Info("録画の終了");
 				aviwriter.Close();
-				if ((strsaveFileName != String.Empty) && (System.IO.File.Exists(System.IO.Path.GetTempPath() + strsaveFileName)))
-					System.IO.File.Move(System.IO.Path.GetTempPath() + strsaveFileName, strSavePath + strsaveFileName);
+				LOG.Info("移動ファイルの存在チェック");
+				if (File.Exists(Path.Combine(Path.GetTempPath(), strsaveFileName)))
+				{
+					LOG.Info("ファイルの移動　移動元:" + Path.Combine(Path.GetTempPath(), strsaveFileName) + "　移動先:" + Path.Combine(strSavePath, strsaveFileName));
+					File.Move(Path.Combine(Path.GetTempPath(), strsaveFileName), Path.Combine(strSavePath, strsaveFileName));
+				}
 				LOG.Debug("ロック用オブジェクトの使用開始");
 				IsRecording = false;
 				LOG.Debug("ロック用オブジェクトの使用終了");
@@ -251,7 +256,10 @@ namespace CaputureVideo
 					// AVIWriterを使用して保存する
 					aviwriter.Codec = "X264";   // x264のFourCC。http://www.fourcc.org/codecs.php
 					aviwriter.FrameRate = 30;	// 使用しているビデオキャプチャのフレームレートがNTSCの為、29.97fps
-					aviwriter.Open(System.IO.Path.GetTempPath() + strsaveFileName, imageSize.Width, imageSize.Height);
+
+					// AVIWriterで保存するファイルをオープンする。
+					// System.IO.Path.Combineメソッドでパスとファイル名をくっつける
+					aviwriter.Open(Path.Combine(Path.GetTempPath(), strsaveFileName), imageSize.Width, imageSize.Height);
 
 					LOG.Debug("ロック用オブジェクトの使用開始");
 					IsRecording = true;
