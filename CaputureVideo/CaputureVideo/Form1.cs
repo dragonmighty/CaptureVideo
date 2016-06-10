@@ -24,9 +24,10 @@ namespace CaputureVideo
 
 		private Stopwatch stopWatch = null;
 		Timer recordTimer = new Timer();
-		private AForge.Video.FFMPEG.VideoFileWriter writer = new AForge.Video.FFMPEG.VideoFileWriter();
+		private AForge.Video.VFW.AVIWriter aviwriter = new AForge.Video.VFW.AVIWriter();
 
 		Timer timer1 = new Timer();
+		String strSavePath = String.Empty;
 		String strsaveFileName = String.Empty;
 
 		Boolean IsRecording = false;
@@ -164,8 +165,8 @@ namespace CaputureVideo
 
 				if (IsRecording)
 				{
-					if ((writer != null) && (image != null) && (writer.IsOpen))
-						writer.WriteVideoFrame(image);
+					if ((aviwriter != null) && (image != null))
+						aviwriter.AddFrame(image);
 				}
 				System.Threading.Monitor.Exit(syncObject);
 			}
@@ -222,12 +223,12 @@ namespace CaputureVideo
 		private void CloseVideoWriter()
 		{
 			System.Threading.Monitor.Enter(syncObject);
-			if (writer != null)
+			if (aviwriter != null)
 			{
 				LOG.Info("録画の終了");
-				writer.Close();
-				if ((strsaveFileName != String.Empty) && (System.IO.File.Exists(strsaveFileName + ".tmp")))
-					System.IO.File.Move(strsaveFileName + ".tmp", strsaveFileName + ".mp4");
+				aviwriter.Close();
+				if ((strsaveFileName != String.Empty) && (System.IO.File.Exists(System.IO.Path.GetTempPath() + strsaveFileName)))
+					System.IO.File.Move(System.IO.Path.GetTempPath() + strsaveFileName, strSavePath + strsaveFileName);
 				LOG.Debug("ロック用オブジェクトの使用開始");
 				IsRecording = false;
 				LOG.Debug("ロック用オブジェクトの使用終了");
@@ -239,14 +240,18 @@ namespace CaputureVideo
 		private void OpenVideoWriter()
 		{
 			System.Threading.Monitor.Enter(syncObject);
-			if (writer != null)
+			if (aviwriter != null)
 			{
 				if (System.IO.Directory.Exists(textBoxSavePath.Text))
 				{
-					strsaveFileName = textBoxSavePath.Text + @"\" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff");
-					LOG.Info("録画の開始: " + strsaveFileName + ".tmp");
+					strSavePath = textBoxSavePath.Text;
+					strsaveFileName = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff.avi");
+					LOG.Info("録画の開始:保存先:" + strSavePath + "、ファイル名:" + strsaveFileName);
 
-					writer.Open(strsaveFileName + ".tmp", imageSize.Width, imageSize.Height, 25, AForge.Video.FFMPEG.VideoCodec.MPEG4);
+					// AVIWriterを使用して保存する
+					aviwriter.Codec = "X264";   // x264のFourCC。http://www.fourcc.org/codecs.php
+					aviwriter.FrameRate = 30;	// 使用しているビデオキャプチャのフレームレートがNTSCの為、29.97fps
+					aviwriter.Open(System.IO.Path.GetTempPath() + strsaveFileName, imageSize.Width, imageSize.Height);
 
 					LOG.Debug("ロック用オブジェクトの使用開始");
 					IsRecording = true;
@@ -302,15 +307,11 @@ namespace CaputureVideo
 				}
 			}
 
-            //fpslabel.Text = "Device running..." + videoSourcePlayer.VideoSource.FramesReceived.ToString() + "FPS.";
-			//GC.Collect();
         }
 
 		async private void recordTimer_tick(object sender, EventArgs e)
 		{
 			LOG.Info("録画分割タイマーが呼ばれました");
-
-			//recordTimer.Stop();
 
 			await Task.Run(() =>
 			{
@@ -321,33 +322,10 @@ namespace CaputureVideo
 				OpenVideoWriter();
 			});
 
-			//recordTimer.Interval = 1000 * 60 * Convert.ToInt32(numericUpDownCutTime.Value);
-			//recordTimer.Start();
-
 			LOG.Info("IsRecording ->" + IsRecording.ToString());
 
 
 		}
-
-		//private void AddDateCaption(ref Bitmap image)
-		//{
-		//	//Bitmap bitmapResult = new Bitmap(source.Size.Width, source.Size.Height);
-		//	using (Graphics g = Graphics.FromImage(image))
-		//	using (Brush b = new SolidBrush(Color.Red))
-		//	using (Font f = new Font("Arial", 30))
-		//	{
-
-		//		try
-		//		{
-		//			//g.DrawImage(source, 0, 0, bitmapResult.Width, bitmapResult.Height);
-		//			g.DrawString(DateTime.Now.ToString(), f, b, new PointF(0, image.Size.Height - 50));
-		//		}
-		//		finally
-		//		{
-
-		//		}
-		//	}
-		//}
 
 		// draw date time with border
 		static private void AddDateCaptionwithBorder(ref Bitmap image)
